@@ -27,7 +27,7 @@ export default {
     })
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'connected') {
-        alert('Peers connected!')
+        console.log('Peers connected!')
       }
     })
     sqs.setMessageReceived(this.onMessageReceived)
