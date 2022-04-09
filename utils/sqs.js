@@ -20,7 +20,7 @@ export default {
             QueueUrl: process.env.QueueUrl,
             ReceiptHandle: m.ReceiptHandle
           }))
-          await _messageReceived(JSON.parse(m.Body))
+          _messageReceived(JSON.parse(m.Body))
         }
       }
     }
