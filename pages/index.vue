@@ -22,7 +22,7 @@ export default {
     videoTracks.forEach(track => peerConnection.addTrack(track, this.$refs.video.srcObject))
     peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
-        await this.$axios.$post('/', event.candidate)
+        await this.$axios.$post('/', { candidate: event.candidate })
       }
     })
     peerConnection.addEventListener('connectionstatechange', () => {
@@ -39,7 +39,9 @@ export default {
   },
   methods: {
     async onMessageReceived (m) {
+      console.log('message received', m)
       if (m.answer) {
+        console.log('add remote', m.answer)
         const remoteDesc = new RTCSessionDescription(m.answer)
         await peerConnection.setRemoteDescription(remoteDesc)
       } else if (m.candidate) {

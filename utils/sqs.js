@@ -14,13 +14,17 @@ export default {
   async start () {
     while (true) {
       const message = await client.send(new ReceiveMessageCommand({ QueueUrl: process.env.QueueUrl, WaitTimeSeconds: 10 }))
-      if (message && message.Messages && message.Messages.length && _messageReceived) {
+      if (message && message.Messages && message.Messages.length) {
         for (const m of message.Messages) {
-          await client.send(new DeleteMessageCommand({
-            QueueUrl: process.env.QueueUrl,
-            ReceiptHandle: m.ReceiptHandle
-          }))
-          _messageReceived(JSON.parse(m.Body))
+          try {
+            await client.send(new DeleteMessageCommand({
+              QueueUrl: process.env.QueueUrl,
+              ReceiptHandle: m.ReceiptHandle
+            }))
+            await _messageReceived(JSON.parse(m.Body))
+          } catch (e) {
+            console.error(e)
+          }
         }
       }
     }
