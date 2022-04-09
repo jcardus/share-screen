@@ -8,36 +8,10 @@
 
 import sqs from '../utils/sqs'
 
-const pc1 = new RTCPeerConnection({
-  iceServers: [
-    {
-      urls: 'stun:openrelay.metered.ca:80'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject'
-    }
-  ]
-})
+const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
 
 export default {
   name: 'IndexPage',
-  data () {
-    return {
-
-    }
-  },
   async mounted () {
     this.$refs.video.srcObject = await navigator.mediaDevices.getDisplayMedia({
       video: { cursor: 'always' },
@@ -45,16 +19,39 @@ export default {
     })
     //      const videoTracks = this.$refs.video.captureStream().getVideoTracks()
 
-    pc1.addEventListener('icecandidate', async (event) => {
+    peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
+        console.log(event)
         await this.$axios.$post('/candidate', event.candidate)
       }
     })
-    const offer = await pc1.createOffer()
-    await pc1.setLocalDescription(offer)
+    peerConnection.addEventListener('connectionstatechange', () => {
+      if (peerConnection.connectionState === 'connected') {
+        alert('Peers connected!')
+      }
+    })
+    sqs.setMessageReceived(this.onMessageReceived)
+    sqs.start().then()
+    const offer = await peerConnection.createOffer()
+    await peerConnection.setLocalDescription(offer)
     await this.$axios.$post('/', offer)
-    const message = await sqs.receiveMessage()
-    console.log('message', message)
+  },
+  methods: {
+    async onMessageReceived (m) {
+      if (m.answer) {
+        console.log('received answer', m.answer)
+        const remoteDesc = new RTCSessionDescription(m.answer)
+        await peerConnection.setRemoteDescription(remoteDesc)
+      } else if (m.iceCandidate) {
+        try {
+          await peerConnection.addIceCandidate(m.iceCandidate)
+        } catch (e) {
+          console.error('Error adding received ice candidate', e)
+        }
+      } else {
+        console.log('ignoring', m)
+      }
+    }
   }
 }
 </script>
