@@ -20,6 +20,9 @@ export default {
     const videoTracks = this.$refs.video.captureStream().getVideoTracks()
     peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
     videoTracks.forEach(track => peerConnection.addTrack(track, this.$refs.video.srcObject))
+    const offer = await peerConnection.createOffer()
+    await peerConnection.setLocalDescription(offer)
+    await this.$axios.$post('/', offer)
     peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
         await this.$axios.$post('/', { candidate: event.candidate })
@@ -32,10 +35,6 @@ export default {
     })
     sqs.setMessageReceived(this.onMessageReceived)
     sqs.start().then()
-
-    const offer = await peerConnection.createOffer()
-    await peerConnection.setLocalDescription(offer)
-    await this.$axios.$post('/', offer)
   },
   methods: {
     async onMessageReceived (m) {
