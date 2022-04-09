@@ -8,7 +8,7 @@
 
 import sqs from '../utils/sqs'
 
-const peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
+let peerConnection = null
 
 export default {
   name: 'IndexPage',
@@ -17,12 +17,12 @@ export default {
       video: { cursor: 'always' },
       audio: false
     })
-    //      const videoTracks = this.$refs.video.captureStream().getVideoTracks()
-
+    const videoTracks = this.$refs.video.captureStream().getVideoTracks()
+    peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
+    videoTracks.forEach(track => peerConnection.addTrack(track, this.$refs.video.srcObject))
     peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
-        console.log(event)
-        await this.$axios.$post('/candidate', event.candidate)
+        await this.$axios.$post('/', event.candidate)
       }
     })
     peerConnection.addEventListener('connectionstatechange', () => {
@@ -32,6 +32,7 @@ export default {
     })
     sqs.setMessageReceived(this.onMessageReceived)
     sqs.start().then()
+
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer)
     await this.$axios.$post('/', offer)
@@ -39,17 +40,10 @@ export default {
   methods: {
     async onMessageReceived (m) {
       if (m.answer) {
-        console.log('received answer', m.answer)
         const remoteDesc = new RTCSessionDescription(m.answer)
         await peerConnection.setRemoteDescription(remoteDesc)
-      } else if (m.iceCandidate) {
-        try {
-          await peerConnection.addIceCandidate(m.iceCandidate)
-        } catch (e) {
-          console.error('Error adding received ice candidate', e)
-        }
-      } else {
-        console.log('ignoring', m)
+      } else if (m.candidate) {
+        await peerConnection.addIceCandidate(m.candidate)
       }
     }
   }
