@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <video ref="video" autoplay playsinline muted />
+  <div style="padding: 30px; font-size: x-large; margin: auto;">
+    <p>{{ message }}</p>
+    <video ref="video" autoplay playsinline muted style="width: 75%" />
   </div>
 </template>
 
@@ -12,6 +13,20 @@ let peerConnection = null
 
 export default {
   name: 'IndexPage',
+  computed: {
+    message () {
+      switch (navigator.language) {
+        case 'pt':
+          return 'A partilhar o ecrã:'
+        case 'fr':
+          return 'Sharing your screen:'
+        case 'es':
+          return 'Compartiendo tu pantalla:'
+        default:
+          return 'Sharing your screen:'
+      }
+    }
+  },
   async mounted () {
     this.candidates = []
     this.$refs.video.srcObject = await navigator.mediaDevices.getDisplayMedia({
