@@ -13,6 +13,7 @@ let peerConnection = null
 export default {
   name: 'IndexPage',
   async mounted () {
+    this.candidates = []
     this.$refs.video.srcObject = await navigator.mediaDevices.getDisplayMedia({
       video: { cursor: 'always' },
       audio: false
@@ -20,14 +21,23 @@ export default {
     const videoTracks = this.$refs.video.captureStream().getVideoTracks()
     peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
     videoTracks.forEach(track => peerConnection.addTrack(track, this.$refs.video.srcObject))
-    const offer = await peerConnection.createOffer()
-    await peerConnection.setLocalDescription(offer)
-    await this.$axios.$post('/', offer)
     peerConnection.addEventListener('icecandidate', async (event) => {
       if (event.candidate) {
-        await this.$axios.$post('/', { candidate: event.candidate })
+        console.log('event', event)
+        const message = { candidate: event.candidate }
+        if (this.offerSent) {
+          console.log('sending', message)
+          await this.$axios.$post('/', message)
+        } else {
+          console.log('holding candidate')
+          this.candidates.push(message)
+        }
       }
     })
+    const offer = await peerConnection.createOffer()
+    await peerConnection.setLocalDescription(offer)
+    console.log('sending', offer)
+    await this.$axios.$post('/', offer)
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'connected') {
         console.log('Peers connected!')
@@ -35,6 +45,11 @@ export default {
     })
     sqs.setMessageReceived(this.onMessageReceived)
     sqs.start().then()
+    if (this.candidates) {
+      for (const c of this.candidates) {
+        await this.$axios.$post('/', c)
+      }
+    }
   },
   methods: {
     async onMessageReceived (m) {

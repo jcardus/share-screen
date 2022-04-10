@@ -13,7 +13,7 @@ export default {
   setMessageReceived: (messageReceived) => { _messageReceived = messageReceived },
   async start () {
     while (true) {
-      const message = await client.send(new ReceiveMessageCommand({ QueueUrl: process.env.QueueUrl, WaitTimeSeconds: 10 }))
+      const message = await client.send(new ReceiveMessageCommand({ QueueUrl: process.env.QueueUrl, WaitTimeSeconds: 2 }))
       if (message && message.Messages && message.Messages.length) {
         for (const m of message.Messages) {
           try {
