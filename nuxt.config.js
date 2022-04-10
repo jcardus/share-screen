@@ -49,8 +49,7 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios',
-    '@nuxtjs/i18n'
+    '@nuxtjs/axios'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
@@ -61,25 +60,5 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-  },
-  i18n: {
-    locales: ['en', 'fr', 'es', 'pt'],
-    vueI18n: {
-      fallbackLocale: 'en',
-      messages: {
-        pt: {
-          welcome: 'A partilhar o ecrã:'
-        },
-        en: {
-          welcome: 'Sharing your screen:'
-        },
-        fr: {
-          welcome: 'Sharing your screen:'
-        },
-        es: {
-          welcome: 'Compartiendo tu pantalla:'
-        }
-      }
-    }
   }
 }
