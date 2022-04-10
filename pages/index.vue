@@ -1,6 +1,7 @@
 <template>
-  <div>
-    <video ref="video" autoplay playsinline muted />
+  <div style="padding: 30px; font-size: x-large; margin: auto;">
+    <p>{{ $t('welcome') }}</p>
+    <video ref="video" autoplay playsinline muted style="width: 75%" />
   </div>
 </template>
 
