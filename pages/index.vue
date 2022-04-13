@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 30px; font-size: x-large; margin: auto;">
+  <div style="padding: 30px; font-size: large; margin: auto;">
     <p>{{ message }} {{ getConnected }}</p>
     <div v-if="!connected">
       {{ logMessage }}
