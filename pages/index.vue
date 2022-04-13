@@ -90,6 +90,10 @@ export default {
   },
   methods: {
     async onMessageReceived (m) {
+      if (this.connected) {
+        this.logMessage = 'ignoring message because connected...'
+        return
+      }
       if (m.answer) {
         const remoteDesc = new RTCSessionDescription(m.answer)
         this.logMessage = 'add remote...'
