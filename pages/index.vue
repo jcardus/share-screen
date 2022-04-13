@@ -70,10 +70,7 @@ export default {
         }
       }
     })
-    const offer = await peerConnection.createOffer()
-    await peerConnection.setLocalDescription(offer)
-    this.logMessage = 'sending' + JSON.stringify(offer)
-    await this.$axios.$post('/', offer)
+    await this.sendOffer()
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'connected') {
         this.connected = true
@@ -87,8 +84,15 @@ export default {
         await this.$axios.$post('/', c)
       }
     }
+    setTimeout(this.sendOffer, 30000)
   },
   methods: {
+    async sendOffer () {
+      const offer = await peerConnection.createOffer()
+      await peerConnection.setLocalDescription(offer)
+      this.logMessage = 'sending' + JSON.stringify(offer)
+      await this.$axios.$post('/', offer)
+    },
     async onMessageReceived (m) {
       if (this.connected) {
         this.logMessage = 'ignoring message because connected...'
