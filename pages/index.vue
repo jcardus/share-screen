@@ -90,7 +90,7 @@ export default {
     async sendOffer () {
       const offer = await peerConnection.createOffer()
       await peerConnection.setLocalDescription(offer)
-      this.logMessage = 'sending' + JSON.stringify(offer)
+      this.logMessage = 'sending offer'
       await this.$axios.$post('/', offer)
     },
     async onMessageReceived (m) {
