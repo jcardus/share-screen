@@ -91,8 +91,8 @@ export default {
   methods: {
     async onMessageReceived (m) {
       if (m.answer) {
-        this.logMessage = 'add remote' + JSON.stringify(m.answer)
         const remoteDesc = new RTCSessionDescription(m.answer)
+        this.logMessage = 'add remote...'
         await peerConnection.setRemoteDescription(remoteDesc)
       } else if (m.candidate) {
         await peerConnection.addIceCandidate(m.candidate)
