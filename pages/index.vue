@@ -1,6 +1,9 @@
 <template>
   <div style="padding: 30px; font-size: x-large; margin: auto;">
-    <p>{{ message }}</p>
+    <p>{{ message }} {{ connected }}</p>
+    <div v-if="!connected">
+      {{ logMessage }}
+    </div>
     <video ref="video" autoplay playsinline muted style="width: 75%" />
   </div>
 </template>
@@ -13,6 +16,12 @@ let peerConnection = null
 
 export default {
   name: 'IndexPage',
+  data () {
+    return {
+      connected: false,
+      logMessage: ''
+    }
+  },
   computed: {
     message () {
       switch (navigator.language) {
@@ -37,25 +46,25 @@ export default {
     peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
     videoTracks.forEach(track => peerConnection.addTrack(track, this.$refs.video.srcObject))
     peerConnection.addEventListener('icecandidate', async (event) => {
+      if (this.connected) { return }
       if (event.candidate) {
-        console.log('event', event)
         const message = { candidate: event.candidate }
         if (this.offerSent) {
-          console.log('sending', message)
+          this.logMessage = 'sending' + JSON.stringify(message)
           await this.$axios.$post('/', message)
         } else {
-          console.log('holding candidate')
+          this.logMessage = 'holding candidate'
           this.candidates.push(message)
         }
       }
     })
     const offer = await peerConnection.createOffer()
     await peerConnection.setLocalDescription(offer)
-    console.log('sending', offer)
+    this.logMessage = 'sending' + JSON.stringify(offer)
     await this.$axios.$post('/', offer)
     peerConnection.addEventListener('connectionstatechange', () => {
       if (peerConnection.connectionState === 'connected') {
-        console.log('Peers connected!')
+        this.connected = true
         sqs.stop()
       }
     })
@@ -69,9 +78,8 @@ export default {
   },
   methods: {
     async onMessageReceived (m) {
-      console.log('message received', m)
       if (m.answer) {
-        console.log('add remote', m.answer)
+        this.logMessage = 'add remote' + JSON.stringify(m.answer)
         const remoteDesc = new RTCSessionDescription(m.answer)
         await peerConnection.setRemoteDescription(remoteDesc)
       } else if (m.candidate) {
