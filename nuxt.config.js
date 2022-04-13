@@ -1,7 +1,5 @@
 export default {
-  // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
   ssr: false,
-
   env: {
     version: process.env.npm_package_version,
     accessKeyId: process.env.accessKeyId,
@@ -14,7 +12,7 @@ export default {
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'share-screen',
+    title: 'Share screen ' + process.env.npm_package_version,
     htmlAttrs: {
       lang: 'en'
     },
