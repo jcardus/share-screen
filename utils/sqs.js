@@ -25,7 +25,7 @@ export default {
             }))
             await _messageReceived(JSON.parse(m.Body))
           } catch (e) {
-            console.error(e)
+            alert(e)
           }
         }
       }
