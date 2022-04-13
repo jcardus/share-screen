@@ -1,6 +1,6 @@
 <template>
   <div style="padding: 30px; font-size: x-large; margin: auto;">
-    <p>{{ message }} {{ connected }}</p>
+    <p>{{ message }} {{ getConnected }}</p>
     <div v-if="!connected">
       {{ logMessage }}
     </div>
@@ -23,6 +23,18 @@ export default {
     }
   },
   computed: {
+    getConnected () {
+      switch (navigator.language) {
+        case 'pt':
+          return this.connected ? 'Sim' : 'Não'
+        case 'fr':
+          return this.connected ? 'Oui' : 'Non'
+        case 'es':
+          return this.connected ? 'Si' : 'No'
+        default:
+          return this.connected
+      }
+    },
     message () {
       switch (navigator.language) {
         case 'pt':
