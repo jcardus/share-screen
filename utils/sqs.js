@@ -10,9 +10,11 @@ const client = new SQSClient({
 let _messageReceived = null
 
 export default {
+  started: false,
   setMessageReceived: (messageReceived) => { _messageReceived = messageReceived },
   async start () {
-    while (true) {
+    this.started = true
+    while (this.started) {
       const message = await client.send(new ReceiveMessageCommand({ QueueUrl: process.env.QueueUrl, WaitTimeSeconds: 2 }))
       if (message && message.Messages && message.Messages.length) {
         for (const m of message.Messages) {
@@ -23,10 +25,13 @@ export default {
             }))
             await _messageReceived(JSON.parse(m.Body))
           } catch (e) {
-            console.error(e)
+            alert(e)
           }
         }
       }
     }
+  },
+  stop () {
+    this.started = false
   }
 }
