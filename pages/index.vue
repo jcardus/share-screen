@@ -98,7 +98,8 @@ export default {
         const remoteDesc = new RTCSessionDescription(m.answer)
         this.logMessage = 'add remote...'
         await peerConnection.setRemoteDescription(remoteDesc)
-      } else if (m.candidate) {
+        this.remoteSet = true
+      } else if (m.candidate && this.remoteSet) {
         await peerConnection.addIceCandidate(m.candidate)
       }
     }
