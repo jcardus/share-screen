@@ -94,7 +94,7 @@ export default {
         this.logMessage = 'ignoring message because connected...'
         return
       }
-      if (m.answer) {
+      if (m.answer && !this.remoteSet) {
         const remoteDesc = new RTCSessionDescription(m.answer)
         this.logMessage = 'add remote...'
         await peerConnection.setRemoteDescription(remoteDesc)
